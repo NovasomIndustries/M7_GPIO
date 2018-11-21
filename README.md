@@ -32,4 +32,4 @@ List of resources and reference material used while building the scripts and lib
 * [Novasom Page ](http://www.novasomindustries.com)
 
 # Credits
-Developed by Pier Francesco Maria Santi aka PFM (pfm.santi@hexcape.com https://www.linkedin.com/in/pierfrancescomariasanti/)
+Developed by Pier Francesco Maria Santi aka PFM ([Send a mail to PFM]pfm.santi@hexcape.com [View PFM linkedin profile]https://www.linkedin.com/in/pierfrancescomariasanti/)
