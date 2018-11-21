@@ -23,7 +23,7 @@ Once imported, syntax for implemented functions should be identical to RPi.GPIO.
 
 All testing of this library is done on a Novasom M7 board (2GB model) running Armbian.
 
-Compatibility with other versions of Linux running on the Novasom M7 is not gauranteed.
+Compatibility with other versions of Linux running on the Novasom M7 is not guaranteed.
 
 # Resources
 List of resources and reference material used while building the scripts and libraries in this repository
@@ -32,4 +32,4 @@ List of resources and reference material used while building the scripts and lib
 * [Novasom Page ](http://www.novasomindustries.com)
 
 # Credits
-Developed by Pier Francesco Maria Santi aka PFM aka EXTRAOMNES aka SIRE (pfm.santi@hexcape.com)
+Developed by Pier Francesco Maria Santi aka PFM (pfm.santi@hexcape.com)
