@@ -29,7 +29,7 @@ Compatibility with other versions of Linux running on the Novasom M7 is not gaur
 List of resources and reference material used while building the scripts and libraries in this repository
 * [Sourceforge - RPi.GPIO](https://sourceforge.net/projects/raspberry-gpio-python/)
 * [Kernel.org - GPIO/SYSFS Documentation](https://www.kernel.org/doc/Documentation/gpio/sysfs.txt)
-* [Novasom Page ](http://www.novasondustries.com)
+* [Novasom Page ](http://www.novasomindustries.com)
 
 # Credits
 Developed by Pier Francesco Maria Santi aka PFM aka EXTRAOMNES aka SIRE (pfm.santi@hexcape.com)
