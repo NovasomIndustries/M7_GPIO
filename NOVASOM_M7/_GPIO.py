@@ -8,9 +8,8 @@ from time import sleep
 
 # Define static module variables
 var_gpio_root = '/sys/class/gpio'
-NOVASOM_M7 = 'NOVASOM_M7'
+RK = 'RK'
 BOARD = 'BOARD'
-BCM = 'BCM'
 HIGH = 1
 LOW = 0
 OUT = 'out'
@@ -18,26 +17,13 @@ IN = 'in'
 RISING = 'rising'
 FALLING = 'falling'
 BOTH = 'both'
-PUD_UP = 0
-PUD_DOWN = 1
-VERSION = '0.6.3'
-RPI_INFO = {'P1_REVISION': 3, 'RAM': '1024M', 'REVISION': 'a22082', 'TYPE': 'Pi 3 Model B', 'PROCESSOR': 'BCM2837', 'MANUFACTURER': 'Embest'}
+ACT_HIGH = 0
+ACT_LOW = 1
+VERSION = '0.2.0'
 
 # Define GPIO arrays
-NOVASOM_M7_valid_channels = [0,60, 64, 65, 67, 68, 69, 76, 79, 80, 81, 83, 84, 85, 86, 87, 88, 89, 96, 97, 98, 100, 101, 102, 103, 104]
-
-#BOARD_to_NOVASOM_M7 = [0, 0, 89, 0, 88, 0, 60, 64, 0, 65, 81, 67, 0, 0, 100, 101, 0, 102, 97, 0, 98, 103, 96, 104, 0, 76, 68, 69, 0, 0, 0, 79, 87, 0, 84, 86, 85, 83, 0, 80]
-#BCM_to_NOVASOM_M7 = [68, 69, 89, 88, 60, 0, 0, 76, 104, 98, 97, 96, 79, 87, 64, 65, 86, 81, 67, 84, 83, 80, 100, 101, 102, 103, 85, 0]
-                      
-
-
-BOARD_to_NOVASOM_M7 = [69, 69, 89, 69, 88, 69, 60, 64, 69, 65, 81, 67, 0, 69, 100, 101, 69, 102, 97, 69, 98, 103, 96, 104, 69, 76, 68, 69, 69, 69, 69, 79, 87, 69, 84, 86, 85, 83, 69, 80]
-BCM_to_NOVASOM_M7 = [68, 69, 89, 88, 60, 69, 69, 76, 104, 98, 97, 96, 79, 87, 64, 65, 86, 81, 67, 84, 83, 80, 100, 101, 102, 103, 85, 0]
-
-
-
-
-                      
+NOVASOM_M7_valid_channels = [0, 67, 76, 79, 80, 81, 83, 84, 85, 86, 87, 88, 89, 96, 97, 98, 100, 101, 102, 103, 104]
+BOARD_to_NOVASOM_M7 = [-1, -1, -1, 89, -1, 88, -1, -1, -1, -1, -1, 81, 67, 0, -1, 100, 101, -1, 102, 97, -1, 98, 103, 96, 104, -1, 76, -1, -1, -1, -1, -1, 79, 87, -1, 84, 86, 85, 83, -1, 80]
 
 # Define dynamic module variables
 gpio_mode = None
@@ -45,35 +31,33 @@ warningmode = 1
 
 # GPIO Functions
 def setmode(mode):
-    if mode in ['NOVASOM_M7','BOARD','BCM']:
+    if mode in ['RK','BOARD']:
         global gpio_mode
         gpio_mode = mode
     else:
-        print("An invalid mode ({}) was passed to setmode(). Use one of the following: NOVASOM_M7, BOARD, BCM").format(mode)
+        print("An invalid mode ({}) was passed to setmode(). Use one of the following: RK, BOARD".format(mode))
 
 def getmode():
-    if gpio_mode in ['NOVASOM_M7','BOARD','BCM']:
+    if gpio_mode in ['RK','BOARD']:
         return gpio_mode
     else:
-        print("Error: An invalid mode ({}) is currently set").format(gpio_mode)
+        print("Error: An invalid mode ({}) is currently set".format(gpio_mode))
 
 def get_gpio_number(channel):
-    if gpio_mode in ['NOVASOM_M7','BOARD','BCM']:
+    if gpio_mode in ['RK','BOARD']:
         # Convert to NOVASOM_M7 GPIO
         if gpio_mode == BOARD:
             channel_new = BOARD_to_NOVASOM_M7[channel]
-        if gpio_mode == BCM:
-            channel_new = BCM_to_NOVASOM_M7[channel]
-        if gpio_mode == NOVASOM_M7:
+        if gpio_mode == RK:
             channel_new = channel
         # Check that the GPIO is valid
         if channel_new in NOVASOM_M7_valid_channels:
             return channel_new
         else:
-            print("Error: GPIO not supported on {0} {1}").format(gpio_mode, channel)
+            print("Error: GPIO not supported on {0} {1}".format(gpio_mode, channel))
             return None
     else:
-        print("RuntimeError: Please set pin numbering mode using GPIO.setmode(GPIO.NOVASOM_M7), GPIO.setmode(GPIO.BOARD), or GPIO.setmode(GPIO.BCM)")
+        print("RuntimeError: Please set pin numbering mode using GPIO.setmode(GPIO.RK) or GPIO.setmode(GPIO.BOARD)")
         return None
 
 def gpio_function(channel):
@@ -100,7 +84,7 @@ def setwarnings(state=True):
         global warningmode
         warningmode = state
     else:
-        print("Error: {} is not a valid warning mode. Use one of the following: True, 1, False, 0").format(state)
+        print("Error: {} is not a valid warning mode. Use one of the following: True, 1, False, 0".format(state))
 
 def validate_direction(channel, validation_type='both'):
     # Translate the GPIO based on the current gpio_mode
@@ -117,13 +101,13 @@ def validate_direction(channel, validation_type='both'):
             direction = 'none'
         # Perform sanity checks
         if (validation_type == 'input') and (direction != 'i'):
-            print("You must setup() the GPIO channel ({0} {1}) as an input first").format(gpio_mode, channel)
+            print("You must setup() the GPIO channel ({0} {1}) as an input first".format(gpio_mode, channel))
             return 0
         elif (validation_type == 'output') and (direction != 'o'):
-            print("You must setup() the GPIO channel ({0} {1}) as an output first").format(gpio_mode, channel)
+            print("You must setup() the GPIO channel ({0} {1}) as an output first".format(gpio_mode, channel))
             return 0
         elif ((validation_type == 'both') and (direction not in ['i', 'o'])) or (direction == 'none'):
-            print("You must setup() the GPIO channel ({0} {1}) first").format(gpio_mode, channel)
+            print("You must setup() the GPIO channel ({0} {1}) first".format(gpio_mode, channel))
             return 0
         else:
             return 1
@@ -131,7 +115,7 @@ def validate_direction(channel, validation_type='both'):
         print("Error: {} is not a valid direction. use one of the following: input, output, both")
         return
 
-def setup(channel, direction, pull_up_down=PUD_DOWN, initial=LOW):
+def setup(channel, direction, act_high_low=ACT_HIGH, initial=LOW):
     # If channel is an intiger, convert intiger to list
     if isinstance(channel, int) == True:
         channel = [channel]
@@ -140,13 +124,13 @@ def setup(channel, direction, pull_up_down=PUD_DOWN, initial=LOW):
         # Translate the GPIO based on the current gpio_mode
         channel_int = get_gpio_number(channel[index])
         if channel_int == None:
-            return
+            return False
         # Check if GPIO export already exists
         var_gpio_filepath = str(var_gpio_root) + "/gpio" + str(channel_int) + "/value"
         var_gpio_exists = os.path.exists(var_gpio_filepath)
         if var_gpio_exists == 1:
             if warningmode == 1:
-                print("This channel ({0} {1}) is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.").format(gpio_mode, channel[index])
+                print("This channel ({0} {1}) is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.".format(gpio_mode, channel[index]))
         # Export GPIO if an export doesn't already exist
         else:
             try:
@@ -155,6 +139,7 @@ def setup(channel, direction, pull_up_down=PUD_DOWN, initial=LOW):
                     file.write(str(channel_int))
             except:
                 print("Error: Unable to export GPIO")
+                return False
         # Set GPIO direction (in/out)
         try:
             var_gpio_filepath = str(var_gpio_root) + "/gpio" + str(channel_int) + "/direction"
@@ -162,7 +147,7 @@ def setup(channel, direction, pull_up_down=PUD_DOWN, initial=LOW):
                 file.write(str(direction))
         except:
             print("Error: Unable to set GPIO direction")
-            return
+            return False
         # If GPIO direction is out, set initial value of the GPIO (high/low)
         if direction == 'out':
             try:
@@ -175,14 +160,17 @@ def setup(channel, direction, pull_up_down=PUD_DOWN, initial=LOW):
                         file.write(str(initial))
             except:
                 print("Error: Unable to set GPIO initial state")
+                return False
         # If GPIO direction is in, set the state of internal pullup (high/low)
         if direction == 'in':
             try:
                 var_gpio_filepath = str(var_gpio_root) + "/gpio" + str(channel_int) + "/active_low"
                 with open(var_gpio_filepath, 'w') as file:
-                    file.write(str(pull_up_down))
+                    file.write(str(act_high_low))
             except:
-                print("Error: Unable to set internal pullup resistor state")
+                print("Error: Unable to set active high/low condition")
+                return False
+    return True
 
 def output(channel, value):
     # If channel is an intiger, convert intiger to list
